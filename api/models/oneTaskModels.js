@@ -1,7 +1,7 @@
 'use strict';
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-
+var bcrypt   = require('bcrypt-nodejs');
 
 /*var TaskSchema = new Schema({
   name: {
@@ -23,7 +23,7 @@ var Schema = mongoose.Schema;
 
 
 var UserSchema = new Schema({
-  username: {
+  _id: {  //username
     type: String,
     Required: true
   },
@@ -105,6 +105,17 @@ var CommentSchema = new Schema({
   },
 });
 
+// methods ======================
+// generating a hash
+UserSchema.methods.generateHash = function(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
+
+// checking if password is valid
+UserSchema.methods.validPassword = function(password) {
+    return bcrypt.compareSync(password, this.password);
+};
+
 var User  = mongoose.model('User', UserSchema);
 var Task  = mongoose.model('Task', TaskSchema);
 var Workspace  = mongoose.model('Workspace', WorkspaceSchema);
@@ -112,6 +123,9 @@ var Comment  = mongoose.model('Comment', CommentSchema);
 var Project  = mongoose.model('Project', ProjectSchema);
 
 //module.exports = mongoose.model('Tasks', TaskSchema);
+
+
+
 
 module.exports = {
     User: User,

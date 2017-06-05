@@ -1,6 +1,8 @@
 var LocalStrategy = require('passport-local').Strategy;
 
 var User = require('../models/oneTaskModels').User;
+var Workspace = require('../models/oneTaskModels').Workspace;
+var Project = require('../models/oneTaskModels').Project;
 
 module.exports = function(passport) {
 	passport.serializeUser((user, done) => {
@@ -42,17 +44,27 @@ module.exports = function(passport) {
 
                 	// if there is no user with that username create the user
                 	var newUser = new User();
-
-                	// set the user's local credentials
                 	newUser._id = username;
                 	newUser.password = newUser.generateHash(password);
                   newUser.name = req.body.name;
                   newUser.email = req.body.email;
 
-                	// save the user
+                  var newProject = new Project();
+                  newProject.name = 'My Personal Project';
+                  newProject.description = 'Project for personal use';
+
+                  var newWorkspace = new Workspace();
+                  newWorkspace.name = 'Personal Projects';
+                  newWorkspace.MemberUserIds.push(newUser._id);
+                  newWorkspace.projects.push(newProject);   //projects are embedded into workspace
+
+                  newUser.WorkspaceIds.push({selected:true, workspaceId: newWorkspace.id});
+
+                	// save the user and workspace
                 	newUser.save(function(err) {
 	                    if (err)
                         	throw err;
+                      newWorkspace.save();    //it's ok if workspace is not created after user is created.
                     	return done(null, newUser);
                 	});
             	}

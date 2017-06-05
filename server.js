@@ -5,22 +5,13 @@ var express = require('express'),
   Task = require('./api/models/todoListModel'),
   bodyParser = require('body-parser');
   
-  //************auth*************
-//const express = require('express');
-//const bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('flash');
 const passport = require('passport');
 //const LocalStrategy = require('passport-local');
 const uuid = require('node-uuid');
-
 var cors = require('cors');
-
-
-
-
-  //**************************
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/OneTaskDB'); 
@@ -29,14 +20,6 @@ app.use(cors({ origin: "http://localhost:8080", credentials: true}));   //used f
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//************auth*************
-/*var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-    next();
-}*/
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'onetasksecretcookie',
@@ -52,45 +35,14 @@ app.use(express.static('public'));
 app.use(passport.initialize());
 app.use(passport.session());
 require('./api/config/passport')(passport);
-app.set('views', './views');
-app.set('view engine', 'pug');
 
-
-
-
-
-// Create custom middleware functions
-
-
-/*// Create home route
-app.get('/', (req, res) => {
-  if (req.user) {
-    return res.redirect('/dashboard');
-  }
-
-  return res.render('index');
-});
-
-app.get('/dashboard',
-  isAuthenticated,
-  (req, res) => {
-    res.render('dashboard');
-  }
-);
-*/
-
-
-
-//**************************auth ends*****************************
-
-var routes = require('./api/routes/oneTaskRoutes');
-routes(app,express,passport);
-
+require('./api/routes/authRoutes')(app,express,passport);
+require('./api/routes/apiRoutes')(app,express);
 
 app.listen(port);
 
 
-console.log('todo list RESTful API server started on: ' + port);
+console.log('OneTask RESTful Node server started on: ' + port);
 
 app.use(function(req, res) {
   res.status(404).send({url: 'Sorry! '+req.originalUrl + ' not found'})

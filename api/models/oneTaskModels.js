@@ -40,9 +40,12 @@ var UserSchema = new Schema({
     Required: true
   },
   WorkspaceIds: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Workspace'
-  }]
+    selected: Boolean,
+    workspaceId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace'
+    }
+  }]  
 });
 
 var TaskSchema = new Schema({
@@ -57,11 +60,11 @@ var TaskSchema = new Schema({
     enum: ['pending', 'ongoing', 'completed']
   },
   AssigneeUserId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User'
   },
   FollowerUserIds: [{
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User'
   }]
 });
@@ -84,7 +87,7 @@ var WorkspaceSchema = new Schema({
     Required: true
   },
   MemberUserIds: [{
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User'
   }],
   projects: [ProjectSchema]
@@ -100,7 +103,7 @@ var CommentSchema = new Schema({
     ref: 'Task'
   },
   CommenterUserId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User'
   },
 });

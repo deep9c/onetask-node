@@ -27,3 +27,11 @@ exports.createWorkspace = function(req, res) {
     res.json(task);
   });
 };
+
+exports.getWorkspace = function(req,res){
+  Workspace.findById(req.params.workspaceid, (err,workspace)=>{
+    if(err)
+      res.send(err);
+    res.json(workspace);
+  })
+}

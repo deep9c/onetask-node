@@ -52,6 +52,7 @@ module.exports = function(passport) {
                   var newProject = new Project();
                   newProject.name = 'My Personal Project';
                   newProject.description = 'Project for personal use';
+                  newProject.selected = true;
 
                   var newWorkspace = new Workspace();
                   newWorkspace.name = 'Personal Projects';

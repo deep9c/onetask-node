@@ -75,6 +75,7 @@ var ProjectSchema = new Schema({
     Required: true
   },
   description: String,
+  selected: Boolean,
   TaskIds: [{
     type: Schema.Types.ObjectId,
     ref: 'Task'

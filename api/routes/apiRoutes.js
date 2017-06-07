@@ -28,6 +28,12 @@ module.exports = function(app, express) {
   apiRoutes.route('/workspace/:workspaceid')
     .get(oneTaskControllers.getWorkspace);
 
+  apiRoutes.route('/task/:userid/:workspaceid/:projid')
+    .get(oneTaskControllers.getTasks);
+
+  apiRoutes.route('/task')
+    .post(oneTaskControllers.createTask);
+
   // todoList Routes
   app.route('/tasks')
     .get(todoList.list_all_tasks)

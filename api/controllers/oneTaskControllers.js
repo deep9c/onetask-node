@@ -71,6 +71,7 @@ exports.getTasks = function(req,res){
     }
     
   })
+
 };
 
 exports.createTask = function(req,res){
@@ -92,11 +93,65 @@ exports.createTask = function(req,res){
         if(err)
           res.send(err);
         else{
-          res.status(200).json(result);
+          if(result)
+            res.status(200).json(newtasksaved);
+          else{
+            res.status(204);
+          }
         }
       }
     );
   });
-  
+};
+
+exports.getComments = function(req,res){
+  var taskid = req.params.taskid;
+  var commentsResp = {comments: []};
+  Comment.find(
+    {'TaskId': taskid}, 
+    (err, comments)=>{
+      console.log('found comments:- ' + comments);
+      commentsResp.comments = comments;
+      res.json(commentsResp);
+    });
+};
+
+exports.createComment = function(req,res){
+  console.log('req received in createComment:- ' + JSON.stringify(req.body));
+  var newComment = new Comment(req.body);
+  newComment.createdDateTime = new Date();
+
+  newComment.save((err,newcommentsaved)=>{
+    if(err)
+        res.send(err);
+
+    res.json(newcommentsaved);
+  });
+};
+
+exports.createProject = function(req,res){
+  console.log('req received in createProject:- ' + JSON.stringify(req.body));
+  var newProject = new Project();
+  newProject.name = req.body.name;
+  newProject.description = req.body.description;
+  newProject.selected = false;
+
+  var workspaceid = req.body.wsid;
+
+  Workspace.update(
+      {_id: workspaceid},
+      {$push: {'projects': newProject}},
+      (err, result)=>{
+        if(err)
+          res.send(err);
+        else{
+          if(result)
+            res.status(200).json(newProject);
+          else{
+            res.status(500);
+          }
+        }
+      }
+    );
 
 };

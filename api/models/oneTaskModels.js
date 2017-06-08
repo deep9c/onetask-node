@@ -99,6 +99,10 @@ var CommentSchema = new Schema({
     type: String,
     Required: true
   },
+  createdDateTime:{
+    type: Date,
+    Required: true
+  },
   TaskId: {
     type: Schema.Types.ObjectId,
     ref: 'Task'

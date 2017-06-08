@@ -34,6 +34,15 @@ module.exports = function(app, express) {
   apiRoutes.route('/task')
     .post(oneTaskControllers.createTask);
 
+  apiRoutes.route('/comment')
+    .post(oneTaskControllers.createComment);  
+
+  apiRoutes.route('/comment/:taskid')
+    .get(oneTaskControllers.getComments);
+
+  apiRoutes.route('/project')
+    .post(oneTaskControllers.createProject);  
+
   // todoList Routes
   app.route('/tasks')
     .get(todoList.list_all_tasks)

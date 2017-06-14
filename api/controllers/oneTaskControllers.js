@@ -19,14 +19,14 @@ exports.createUser = function(req, res) {
   });
 };
 
-exports.createWorkspace = function(req, res) {
+/*exports.createWorkspace = function(req, res) {
   var newUser = new models.User(req.body);
   newUser.save(function(err, user) {
     if (err)
       res.send(err);
     res.json(user);
   });
-};
+};*/
 
 exports.getWorkspace = function(req,res){
   Workspace.findById(req.params.workspaceid, (err,workspace)=>{
@@ -139,19 +139,42 @@ exports.createProject = function(req,res){
   var workspaceid = req.body.wsid;
 
   Workspace.update(
-      {_id: workspaceid},
-      {$push: {'projects': newProject}},
-      (err, result)=>{
-        if(err)
-          res.send(err);
+    {_id: workspaceid},
+    {$push: {'projects': newProject}},
+    (err, result)=>{
+      if(err)
+        res.send(err);
+      else{
+        if(result)
+          res.status(200).json(newProject);
         else{
-          if(result)
-            res.status(200).json(newProject);
-          else{
-            res.status(500);
-          }
+          res.status(500);
         }
       }
-    );
+    }
+  );
+};
 
+exports.createWorkspace = function(req,res){
+  console.log('received req into createWorkspace: ' + JSON.stringify(req.body));
+  var newWorkspace = new Workspace();
+  newWorkspace.name = req.body.workspacename;
+  newWorkspace.MemberUserIds.push(req.body.username);
+  //newWorkspace.projects.push(newProject);   //projects are embedded into workspace
+
+  //get user here  
+  User.findById(req.body.username, (err,user)=>{
+    if(err)
+      res.send(err);
+    user.WorkspaceIds.push({selected:true, workspaceId: newWorkspace.id});
+    user.save(function(err) {
+    if (err)
+      throw err;
+    newWorkspace.save((err,ws)=>{
+      res.json(ws);
+    });
+    
+  });
+  })
+  
 };

@@ -3,7 +3,8 @@ var express = require('express'),
   port = process.env.PORT || 3000,
   mongoose = require('mongoose'),
   Task = require('./api/models/todoListModel'),
-  bodyParser = require('body-parser');
+  bodyParser = require('body-parser'),
+  mongourl = /*process.env.MONGOLAB_URI ||*/ 'mongodb://localhost/OneTaskDB';
   
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -14,7 +15,12 @@ const uuid = require('node-uuid');
 var cors = require('cors');
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/OneTaskDB'); 
+mongoose.connect(mongourl,(error)=>{    //'mongodb://localhost/OneTaskDB'
+  if (error) 
+    console.error(error);
+  else 
+    console.log('mongo connected on ' + mongourl);
+});
 
 app.use(cors({ origin: "http://localhost:8080", credentials: true}));   //used for cross-domain requests
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,7 +32,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: new MongoStore({
-    url: process.env.MONGO_URL || 'mongodb://localhost/OneTaskDB',
+    url: mongourl,
   }),
 }));
 //app.use(express.session({ secret: 'keyboard cat' }));

@@ -5,6 +5,9 @@
 ## Build Setup
 
 ``` bash
+# install mongo
+sudo apt-get install mongodb
+
 # install dependencies
 npm install
 

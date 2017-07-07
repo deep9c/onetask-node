@@ -4,7 +4,8 @@ var express = require('express'),
   mongoose = require('mongoose'),
   Task = require('./api/models/todoListModel'),
   bodyParser = require('body-parser'),
-  mongourl = process.env.MONGOLAB_URI || 'mongodb://localhost/OneTaskDB';
+  mongourl = process.env.MONGOLAB_URI || 'mongodb://localhost/OneTaskDB',
+  vueuri = process.env.VUE_URI || "http://localhost:8080";
   
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -22,7 +23,8 @@ mongoose.connect(mongourl,(error)=>{    //'mongodb://localhost/OneTaskDB'
     console.log('mongo connected on ' + mongourl);
 });
 
-app.use(cors({ origin: "http://localhost:8080", credentials: true}));   //used for cross-domain requests
+
+app.use(cors({ origin: vueuri, credentials: true}));   //used for cross-domain requests
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

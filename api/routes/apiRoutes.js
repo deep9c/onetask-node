@@ -35,7 +35,9 @@ module.exports = function(app, express) {
     .get(oneTaskControllers.getTasks);
 
   apiRoutes.route('/task')
-    .post(oneTaskControllers.createTask);
+    .post(oneTaskControllers.createTask)
+    .put(oneTaskControllers.updateTask);
+    //.delete(oneTaskControllers.deleteTask);
 
   apiRoutes.route('/comment')
     .post(oneTaskControllers.createComment);  

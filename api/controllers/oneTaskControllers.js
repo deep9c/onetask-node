@@ -96,13 +96,75 @@ exports.createTask = function(req,res){
           if(result)
             res.status(200).json(newtasksaved);
           else{
-            res.status(204);
+            res.status(204);  //no content (WS not found)
           }
         }
       }
     );
   });
 };
+
+exports.updateTask = function(req,res){  
+  console.log('updateTask: ' + JSON.stringify(req.body));
+  var op = req.body.operation;
+  if(op == 'update'){
+  Task.update(
+    {_id : req.body.taskid}, //condition
+    req.body,   //update -> status,title,description
+    (err, result)=>{
+      if(err)
+        res.send(err);
+      else{
+        if(result)
+          res.status(200).json(result);
+        else{
+          res.status(204);
+        }
+      }
+    }
+  );
+  }
+  else if(op == 'delete'){
+    Workspace.update(
+      {_id: req.body.workspaceid, 'projects._id': req.body.projectid},
+      {$pull: {'projects.$.TaskIds': req.body.taskid}},
+      (err, result)=>{
+        if(err)
+          res.send(err);
+        else{
+          if(result){
+            //res.status(200).json(result);
+            Task.remove({
+              _id: req.body.taskid
+            }, function(err) {
+            if (err)
+              res.send(err);
+            res.json({ message: 'Task successfully deleted' });
+            });
+          }
+          else{
+            res.status(204);  //no content (WS not found)
+          }
+        }
+      }
+    );
+
+
+  
+  }
+
+};
+
+/*exports.deleteTask = function(req, res) {
+  console.log('deleteTask: ' + JSON.stringify(req.params));
+  Task.remove({
+    _id: req.body.taskid
+  }, function(err) {
+    if (err)
+      res.send(err);
+    res.json({ message: 'Task successfully deleted' });
+  });
+};*/
 
 exports.getComments = function(req,res){
   var taskid = req.params.taskid;

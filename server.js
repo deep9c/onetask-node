@@ -4,7 +4,7 @@ var express = require('express'),
   mongoose = require('mongoose'),
   Task = require('./api/models/todoListModel'),
   bodyParser = require('body-parser'),
-  mongourl = /*process.env.MONGOLAB_URI ||*/ 'mongodb://localhost/OneTaskDB';
+  mongourl = process.env.MONGOLAB_URI || 'mongodb://localhost/OneTaskDB';
   
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);

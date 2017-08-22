@@ -36,13 +36,68 @@ exports.getWorkspace = function(req,res){
   })
 };
 
+exports.updateWorkspace = function(req,res){  
+  console.log('updateWorkspace: ' + JSON.stringify(req.body));
+  //var op = req.body.operation;
+  //if(op == 'update'){
+    Workspace.findById(req.body.wsid, (err,ws)=>{
+      if(err)
+        res.send(err);
+      
+      ws.MemberUserIds.push(req.body.userid);   //new member added to ws
+
+      Workspace.update(
+        {_id : req.body.wsid}, //condition
+        ws,   //update
+        (err, result)=>{
+          if(err)
+            res.send(err);
+          else{
+            if(result){
+              //update user
+              User.findById(req.body.userid, (err,user)=>{
+                if(err)
+                  res.send(err);
+      
+                user.WorkspaceIds.push({selected:false, workspaceId:req.body.wsid});   //new member added to ws
+
+                User.update(
+                  {_id : req.body.userid}, //condition
+                  user,   //update
+                  (err, result)=>{
+                    if(err)
+                      res.send(err);
+                    else{
+                      if(result){                                    
+                        res.status(200).json(result);
+                      }
+                      else{
+                        res.status(204);    //no content (WS not found)
+                      }
+                    }
+                  }
+                );
+              })
+              //res.status(200).json(result);
+            }
+            else{
+              res.status(204);    //no content (WS not found)
+            }
+          }
+        }
+      );
+    })
+  //}
+};
+
 exports.getTasks = function(req,res){
   var workspaceid = req.params.workspaceid;
   var projid = req.params.projid;
+  var userid = req.params.userid;
   console.log('getTasks called req.params.workspaceid= ' + workspaceid + '..projid= ' + projid);
 
   //Workspace.find({'projects._id': projid}, (err, foundWorkspace)=>{});
-
+if(workspaceid && projid){
   Workspace.findById(workspaceid, (err,workspace)=>{
     if(err)
       res.send(err);
@@ -71,6 +126,16 @@ exports.getTasks = function(req,res){
     }
     
   })
+}
+
+else{ //get tasks by assignee username
+  Task.find({AssigneeUserId:userid},(err, tasks)=>{
+    if(err)
+      res.send(err);
+    var TasksList = {tasks: tasks}; 
+    res.json(TasksList);
+  })
+}
 
 };
 
@@ -110,7 +175,7 @@ exports.updateTask = function(req,res){
   if(op == 'update'){
   Task.update(
     {_id : req.body.taskid}, //condition
-    req.body,   //update -> status,title,description
+    req.body,   //update -> status,title,description,AssigneeUserId
     (err, result)=>{
       if(err)
         res.send(err);
@@ -197,6 +262,7 @@ exports.createProject = function(req,res){
   newProject.name = req.body.name;
   newProject.description = req.body.description;
   newProject.selected = false;
+  newProject.OwnerUserId = req.body.username;
 
   var workspaceid = req.body.wsid;
 

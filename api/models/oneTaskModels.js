@@ -79,7 +79,15 @@ var ProjectSchema = new Schema({
   TaskIds: [{
     type: Schema.Types.ObjectId,
     ref: 'Task'
-  }]
+  }],
+  OwnerUserId: {
+    type: String,
+    ref: 'User'
+  },
+  MemberUserIds: {
+    type: String,
+    ref: 'User'
+  }
 });
 
 var WorkspaceSchema = new Schema({

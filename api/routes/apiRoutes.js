@@ -29,9 +29,13 @@ module.exports = function(app, express) {
     .get(oneTaskControllers.getWorkspace);
 
   apiRoutes.route('/workspace')
-    .post(oneTaskControllers.createWorkspace); 
+    .post(oneTaskControllers.createWorkspace)
+    .put(oneTaskControllers.updateWorkspace);
 
   apiRoutes.route('/task/:userid/:workspaceid/:projid')
+    .get(oneTaskControllers.getTasks);
+
+  apiRoutes.route('/task/:userid')
     .get(oneTaskControllers.getTasks);
 
   apiRoutes.route('/task')

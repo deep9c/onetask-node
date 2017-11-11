@@ -8,7 +8,8 @@ var User  = mongoose.model('User'),
  Task  = mongoose.model('Task'),
  Workspace  = mongoose.model('Workspace'),
  Comment  = mongoose.model('Comment'),
- Project  = mongoose.model('Project');
+ Project  = mongoose.model('Project'),
+ User  = mongoose.model('User');
 
 exports.createUser = function(req, res) {
   var newUser = new models.User(req.body);
@@ -29,10 +30,25 @@ exports.createUser = function(req, res) {
 };*/
 
 exports.getWorkspace = function(req,res){
-  Workspace.findById(req.params.workspaceid, (err,workspace)=>{
+  Workspace.find({ "_id": req.params.workspaceid })
+    .populate('MemberUserIds')
+    .exec((err,workspace)=>{
+      if(err)
+        res.send(err);
+      //delete workspace[0].MemberUserIds[0]["password"]; //remove passwords from response
+      //console.log("----WS----: " + JSON.stringify(workspace));
+      res.json(workspace[0]);
+    })
+};
+
+exports.getUser = function(req,res){
+  //var userdata = {userid:'', name:'', email:''};
+  User.findById(req.params.userid, (err,user)=>{
     if(err)
       res.send(err);
-    res.json(workspace);
+    delete user[password];
+    delete user[WorkspaceIds];
+    res.json(user);
   })
 };
 
@@ -69,7 +85,7 @@ exports.updateWorkspace = function(req,res){
                       res.send(err);
                     else{
                       if(result){                                    
-                        res.status(200).json(result);
+                        res.json(user);
                       }
                       else{
                         res.status(204);    //no content (WS not found)
@@ -110,10 +126,13 @@ if(workspaceid && projid){
     var TasksList = {tasks: []};
     if(workspace.projects[requiredprojindex].TaskIds){
       var promise1 = workspace.projects[requiredprojindex].TaskIds.map((taskid)=>{
-        return Task.findById(taskid, (err, task)=>{
+        return Task.findById(taskid)
+          .populate('AssigneeUserId')
+          .exec((err, task)=>{
           if(err)
             res.send(err);
-          //console.log('Task found--> ' + JSON.stringify(task));
+          //console.log('****Task found--> ' + JSON.stringify(task)); 
+          //TODO: remove passwords from assigneeUser
           TasksList.tasks.push(task);
           return task;
         });
@@ -231,13 +250,15 @@ exports.updateTask = function(req,res){
   });
 };*/
 
+
 exports.getComments = function(req,res){
   var taskid = req.params.taskid;
   var commentsResp = {comments: []};
-  Comment.find(
-    {'TaskId': taskid}, 
-    (err, comments)=>{
-      console.log('found comments:- ' + comments);
+  Comment.find({'TaskId': taskid})
+    .populate('CommenterUserId')
+    .exec((err, comments)=>{
+      console.log('found comments:- ' + JSON.stringify(comments));
+      //TODO: remove passwords from users
       commentsResp.comments = comments;
       res.json(commentsResp);
     });
@@ -251,8 +272,10 @@ exports.createComment = function(req,res){
   newComment.save((err,newcommentsaved)=>{
     if(err)
         res.send(err);
-
-    res.json(newcommentsaved);
+    newcommentsaved.populate('CommenterUserId',(err,newcommentpopulated)=>{
+      res.json(newcommentpopulated);
+    })
+    
   });
 };
 

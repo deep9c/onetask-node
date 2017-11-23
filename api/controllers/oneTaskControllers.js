@@ -5,6 +5,8 @@ var mongoose = require('mongoose');
 //  Task = mongoose.model('Tasks');
 
 var User  = mongoose.model('User'),
+ FBUser  = mongoose.model('FBUser'),
+ GoogleUser  = mongoose.model('GoogleUser'),
  Task  = mongoose.model('Task'),
  Workspace  = mongoose.model('Workspace'),
  Comment  = mongoose.model('Comment'),
@@ -16,6 +18,26 @@ exports.createUser = function(req, res) {
   newUser.save(function(err, user) {
     if (err)
       res.send(err);
+    res.json(user);
+  });
+};
+
+exports.createFBUser = function(req, res) {
+  var newUser = new models.FBUser(req.body);
+  newUser.save(function(err, user) {
+    if (err)
+      res.send(err);
+    console.log("fb user created: " + JSON.stringify(req.body));
+    res.json(user);
+  });
+};
+
+exports.createGoogleUser = function(req, res) {
+  var newUser = new models.GoogleUser(req.body);
+  newUser.save(function(err, user) {
+    if (err)
+      res.send(err);
+    console.log("google user created: " + JSON.stringify(req.body));
     res.json(user);
   });
 };
@@ -199,8 +221,18 @@ exports.updateTask = function(req,res){
       if(err)
         res.send(err);
       else{
-        if(result)
-          res.status(200).json(result);
+        if(result){
+          Task.findById(req.body.taskid)
+          .populate('AssigneeUserId')
+          .exec((err, task)=>{
+          if(err)
+            res.send(err);
+          //console.log('****Task found--> ' + JSON.stringify(task)); 
+          //TODO: remove passwords from assigneeUser
+          res.status(200).json(task);
+        });
+          
+        }
         else{
           res.status(204);
         }

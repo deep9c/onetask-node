@@ -21,6 +21,28 @@ var bcrypt   = require('bcrypt-nodejs');
   }
 });*/
 
+var FBUserSchema = new Schema({
+  _id: {  //username
+    type: String,
+    Required: true
+  },  
+  password: {
+    type: String,
+    Required: true
+  },  
+});
+
+var GoogleUserSchema = new Schema({
+  _id: {  //username
+    type: String,
+    Required: true
+  },  
+  password: {
+    type: String,
+    Required: true
+  },  
+});
+
 
 var UserSchema = new Schema({
   _id: {  //username
@@ -132,6 +154,8 @@ UserSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
 
+var FBUser  = mongoose.model('FBUser', FBUserSchema);
+var GoogleUser  = mongoose.model('GoogleUser', GoogleUserSchema);
 var User  = mongoose.model('User', UserSchema);
 var Task  = mongoose.model('Task', TaskSchema);
 var Workspace  = mongoose.model('Workspace', WorkspaceSchema);
@@ -144,6 +168,8 @@ var Project  = mongoose.model('Project', ProjectSchema);
 
 
 module.exports = {
+    FBUser: FBUser,
+    GoogleUser: GoogleUser,
     User: User,
     Task: Task,
     Workspace: Workspace,

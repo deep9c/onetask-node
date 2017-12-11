@@ -52,8 +52,11 @@ module.exports = function(app, express) {
   apiRoutes.route('/project')
     .post(oneTaskControllers.createProject);
 
- 
+  apiRoutes.route('/attachment/:id')
+    .post(oneTaskControllers.postAttachment)
+    .get(oneTaskControllers.getAttachment);
 
+/*
   // todoList Routes
   app.route('/tasks')
     .get(todoList.list_all_tasks)
@@ -67,15 +70,12 @@ module.exports = function(app, express) {
 
     app.route('/user')
     .post(oneTaskControllers.createUser);
-    app.route('/fbuser')
-    .post(oneTaskControllers.createFBUser);
-    app.route('/googleuser')
-    .post(oneTaskControllers.createGoogleUser);
 
     app.route('/workspace')
     .post(oneTaskControllers.createWorkspace);
+*/
 
-
+  
   app.use('/api', apiRoutes);
 
 };

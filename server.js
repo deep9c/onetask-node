@@ -8,7 +8,8 @@ var express = require('express'),
   originwhitelist = process.env.ORIGIN_WHITELIST || ["http://localhost:8080"];
 
 //var originwhitelist = ['http://example1.com', 'http://example2.com']
-
+exports.mongourl_dummy = mongourl;
+exports.mongoose_dummy = mongoose;
   
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -22,8 +23,10 @@ mongoose.Promise = global.Promise;
 mongoose.connect(mongourl,(error)=>{    //'mongodb://localhost/OneTaskDB'
   if (error) 
     console.error(error);
-  else 
+  else{ 
     console.log('mongo connected on ' + mongourl);
+    //require('./api/config/fileupload')(mongoose);
+  }  
 });
 
 var corsOptions = {
@@ -31,7 +34,8 @@ var corsOptions = {
     if (originwhitelist.indexOf(origin) !== -1) {
       callback(null, true)
     } else {
-      callback(new Error('Not allowed by CORS'))
+      //callback(new Error('Not allowed by CORS'))
+      callback(null, true)    //remove this later
     }
   },
   credentials: true
@@ -59,6 +63,10 @@ require('./api/config/passport')(passport);
 
 require('./api/routes/authRoutes')(app,express,passport);
 require('./api/routes/apiRoutes')(app,express);
+
+//following code is for attachment upload
+
+
 
 app.listen(port);
 

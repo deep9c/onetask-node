@@ -21,28 +21,6 @@ var bcrypt   = require('bcrypt-nodejs');
   }
 });*/
 
-var FBUserSchema = new Schema({
-  _id: {  //username
-    type: String,
-    Required: true
-  },  
-  password: {
-    type: String,
-    Required: true
-  },  
-});
-
-var GoogleUserSchema = new Schema({
-  _id: {  //username
-    type: String,
-    Required: true
-  },  
-  password: {
-    type: String,
-    Required: true
-  },  
-});
-
 
 var UserSchema = new Schema({
   _id: {  //username
@@ -88,7 +66,11 @@ var TaskSchema = new Schema({
   FollowerUserIds: [{
     type: String,
     ref: 'User'
-  }]
+  }],
+  attachments: [{
+    type: Schema.Types.ObjectId,
+    ref: 'UploadedFile'
+  }],
 });
 
 var ProjectSchema = new Schema({
@@ -143,6 +125,8 @@ var CommentSchema = new Schema({
   },
 });
 
+
+
 // methods ======================
 // generating a hash
 UserSchema.methods.generateHash = function(password) {
@@ -154,13 +138,12 @@ UserSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
 
-var FBUser  = mongoose.model('FBUser', FBUserSchema);
-var GoogleUser  = mongoose.model('GoogleUser', GoogleUserSchema);
 var User  = mongoose.model('User', UserSchema);
 var Task  = mongoose.model('Task', TaskSchema);
 var Workspace  = mongoose.model('Workspace', WorkspaceSchema);
 var Comment  = mongoose.model('Comment', CommentSchema);
 var Project  = mongoose.model('Project', ProjectSchema);
+var UploadedFile = mongoose.model("UploadedFile", new Schema({}, {strict: false}), "attachment.files" );
 
 //module.exports = mongoose.model('Tasks', TaskSchema);
 
@@ -168,8 +151,6 @@ var Project  = mongoose.model('Project', ProjectSchema);
 
 
 module.exports = {
-    FBUser: FBUser,
-    GoogleUser: GoogleUser,
     User: User,
     Task: Task,
     Workspace: Workspace,

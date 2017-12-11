@@ -2,42 +2,30 @@
 var models = require('../models/oneTaskModels');
 
 var mongoose = require('mongoose');
-//  Task = mongoose.model('Tasks');
+var mongodb = mongoose.mongo;
+const MongoClient = mongodb.MongoClient;
+const ObjectID = mongodb.ObjectID;
+const db =  mongoose.connection.db;
 
 var User  = mongoose.model('User'),
- FBUser  = mongoose.model('FBUser'),
- GoogleUser  = mongoose.model('GoogleUser'),
  Task  = mongoose.model('Task'),
  Workspace  = mongoose.model('Workspace'),
  Comment  = mongoose.model('Comment'),
  Project  = mongoose.model('Project'),
  User  = mongoose.model('User');
 
+//following are for attachment file upload/download
+const multer = require('multer');
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage, limits: { fields: 1, fileSize: 6000000, files: 1, parts: 2 }});
+const { Readable } = require('stream');
+
+
 exports.createUser = function(req, res) {
   var newUser = new models.User(req.body);
   newUser.save(function(err, user) {
     if (err)
       res.send(err);
-    res.json(user);
-  });
-};
-
-exports.createFBUser = function(req, res) {
-  var newUser = new models.FBUser(req.body);
-  newUser.save(function(err, user) {
-    if (err)
-      res.send(err);
-    console.log("fb user created: " + JSON.stringify(req.body));
-    res.json(user);
-  });
-};
-
-exports.createGoogleUser = function(req, res) {
-  var newUser = new models.GoogleUser(req.body);
-  newUser.save(function(err, user) {
-    if (err)
-      res.send(err);
-    console.log("google user created: " + JSON.stringify(req.body));
     res.json(user);
   });
 };
@@ -150,6 +138,7 @@ if(workspaceid && projid){
       var promise1 = workspace.projects[requiredprojindex].TaskIds.map((taskid)=>{
         return Task.findById(taskid)
           .populate('AssigneeUserId')
+          .populate('attachments')
           .exec((err, task)=>{
           if(err)
             res.send(err);
@@ -360,4 +349,83 @@ exports.createWorkspace = function(req,res){
   });
   })
   
+};
+
+exports.postAttachment = function(req,res){
+  upload.single('attachment')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: "Upload Request Validation Failed" });
+    } else if(!req.file) {
+      return res.status(400).json({ message: "No file in request body" });
+    }
+
+    let fileName = req.file.originalname;
+
+    // Covert buffer to Readable Stream
+    const readablePhotoStream = new Readable();
+    readablePhotoStream.push(req.file.buffer);
+    readablePhotoStream.push(null);
+    console.log("************: " + req.file.originalname);
+    let bucket = new mongodb.GridFSBucket(db, {
+      bucketName: 'attachment'
+    });
+
+    let uploadStream = bucket.openUploadStream(fileName);
+    let fileid = uploadStream.id;
+    readablePhotoStream.pipe(uploadStream);
+
+    uploadStream.on('error', () => {
+      return res.status(500).json({ message: "Error uploading file" });
+    });
+
+    uploadStream.on('finish', () => {
+      var Task = mongoose.model('Task');
+      var taskid = req.params.id;
+      Task.findById(taskid, function(err, task) {
+        // handle error
+        if(!task){
+          return res.status(404).json({message: "Task not found"});
+        }
+        if(err){
+          return res.status(500).json({message: "Error in retrieving Task"});
+        }
+        task.attachments.push(fileid);
+        task.save(function(err, updatedTask) {
+          // handle error
+          //return res.json(200, updatedTask)
+          return res.status(201).json({"_id":fileid, "filename":fileName});
+        })
+      });
+      
+    });
+  });
+};
+
+exports.getAttachment = function(req,res){
+  console.log("getAttachment() of controller called");
+  try {
+    var fileid = new ObjectID(req.params.id);
+  } catch(err) {
+    return res.status(400).json({ message: "Invalid fileid in URL parameter" }); 
+  }
+
+  let bucket = new mongodb.GridFSBucket(db, {
+    bucketName: 'attachment'
+  });
+
+  let downloadStream = bucket.openDownloadStream(fileid);
+
+  downloadStream.on('data', (chunk) => {
+    console.log("getAttachment response sent");
+    res.write(chunk);
+  });
+
+  downloadStream.on('error', () => {
+    res.sendStatus(404);
+  });
+
+  downloadStream.on('end', () => {
+    res.end();
+  });
+
 };

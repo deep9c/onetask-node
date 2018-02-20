@@ -56,6 +56,9 @@ module.exports = function(app, express) {
     .post(oneTaskControllers.postAttachment)
     .get(oneTaskControllers.getAttachment);
 
+  apiRoutes.route('/chatbot/:message')
+    .get(oneTaskControllers.getChat);
+
 /*
   // todoList Routes
   app.route('/tasks')

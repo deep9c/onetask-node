@@ -432,5 +432,6 @@ exports.getAttachment = function(req,res){
 
 exports.getChat = function(req,res){
   console.log("new chat: " + req.params.message);
+  
   res.json({msg:"dummy reply"});
 };

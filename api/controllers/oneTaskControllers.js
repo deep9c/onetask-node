@@ -82,9 +82,7 @@ exports.updateWorkspace = function(req,res){
             if(result){
               //update user
               User.findById(req.body.userid, (err,user)=>{
-                if(err)
-                  res.send(err);
-      
+                if(user){                                      
                 user.WorkspaceIds.push({selected:false, workspaceId:req.body.wsid});   //new member added to ws
 
                 User.update(
@@ -98,11 +96,16 @@ exports.updateWorkspace = function(req,res){
                         res.json(user);
                       }
                       else{
-                        res.status(204);    //no content (WS not found)
+                        res.status(204).json({error:'Workspace not found!'});    //no content (WS not found)
                       }
                     }
                   }
                 );
+              }
+              else{
+                console.log("updateWorkspace: user not found");
+                res.status(204).json({error:'User not found!'});  //user not found
+              }
               })
               //res.status(200).json(result);
             }

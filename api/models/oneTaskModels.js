@@ -104,7 +104,7 @@ var WorkspaceSchema = new Schema({
     ref: 'User'
   }],
   projects: [ProjectSchema]
-});
+}, {usePushEach: true});    //used to enable $pushApp in Mongo as it's deprecated in newer versions
 
 var CommentSchema = new Schema({
   content: {
